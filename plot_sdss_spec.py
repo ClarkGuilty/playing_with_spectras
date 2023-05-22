@@ -50,7 +50,7 @@ for i in range(len(ras)):
 
     xid = SDSS.query_region(pos, spectro=True,radius=60*u.arcsec)
     print("xid",xid)
-    print(r'len of xid: {len(xid}')
+    print(r'len of xid: {}'.format(len(xid)))
     if len(xid) < 1:
         raise Exception(f'No spectra available for that coordinates {args.RA},{args.Dec}')
     xid = xid[0]
@@ -67,7 +67,7 @@ for i in range(len(ras)):
     #plot the data and best fit model from SDSS
     ax.plot(10.**logwav, flux, color='red', alpha=0.5)
     ax.plot(10.**logwav, model, color='red')
-    ax.set_title('RA, DEC='+str(ra)+', '+str(dec))
+    ax.set_title('RA, DEC='+str(ra)+', '+str(dec)+', zl={}'.format(zl))
     ax.set_xlim(args.lmin, args.lmax)
     ax.set_ylim(ymin, ymax)
     textheight = [10,5] * len(linenames)
@@ -106,3 +106,4 @@ for i in range(len(ras)):
                 ax.vlines(x=line*(1+z), ymin=0, ymax=1, color='black', ls='--', transform=ax.get_xaxis_transform(), alpha=0.5)
                 plt.text(line*(1+z),textheight[k],linenames[k])
     plt.show(block=True)
+    plt.savefig('Figures/{ra}_{dec}.png')
