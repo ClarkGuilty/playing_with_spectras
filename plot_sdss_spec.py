@@ -10,42 +10,54 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description='Configure the parameters of the execution.')
-parser.add_argument("--RA", help="RA of the target",default=181.4184,type=float)
-parser.add_argument("--Dec", help="Dec of the target",default=49.1748,type=float)
-parser.add_argument("--zl", help="Redshift of the deflector",default=0.405, type=float)
-parser.add_argument("--zs", help="Redshift of the source",default=0.405, type=float)
+parser.add_argument("--RA", help="RA of the target",default=None,type=float)
+parser.add_argument("--Dec", help="Dec of the target",default=None,type=float)
+parser.add_argument("--zl", help="Redshift of the deflector",default=None, type=float)
+parser.add_argument("--zs", help="Redshift of the source",default=None, type=float)
 parser.add_argument("--lmin", help="Minimum wavelength (Angstroms)",default=3800, type=float)
 parser.add_argument("--lmax", help="Maximum wavelength (Angstroms)",default=9500, type=float)
+parser.add_argument("--RADec", help="RA,Dec in degrees (comma as separator)",type=str)
 
 
-parser.add_argument("--plotlinessource", help="True to plot lines on the residuals",action="store_true")
-parser.add_argument("--plotlineslens", help="True to plot lines on the data",action="store_true")
+parser.add_argument("--plotlinessource", help="True to plot lines on the residuals",action=argparse.BooleanOptionalAction,default=True)
+parser.add_argument("--plotlineslens", help="True to plot lines on the data",action=argparse.BooleanOptionalAction,default=True)
 args = parser.parse_args()
 linenames = ['Lyb', 'OVI', 'Lya', 'NV', 'OI_1', 'CII_1', 'SiIV', 'SiIV\ \n+OIV', 'CIV', 'HeII', 'OIII_1', 'AlIII', 'CIII', 'CII_2', 'FeII_1', 'NeIV', 'FeII_2', 'MgII', 'NeV', 'NeVI', 'OII_1', 'OII_2', 'NeIII', 'HeI', 'SII_1', 'Hd', 'Hg', 'OIII_2', 'Hb', 'OIII_3', 'OIII_4', 'OIII_5', 'HeI_1', 'OI_2', 'OI_3', 'NI', 'NII_1', 'Ha', 'NII_2', 'SII_2', 'SII_3', 'Ca H', 'K', 'G', 'Mg', 'Na', 'NIII']
 lines = [1025.05577, 1033.160518, 1215.075915, 1240.220377, 1304.948362, 1334.730576, 1397.032745, 1399.222767, 1548.897336, 1639.808838, 1665.255924, 1856.778311, 1908.103559, 2325.285565, 2382.037919, 2438.760078, 2599.395781, 2798.292088, 3345.828232, 3425.867762, 3726.032278, 3728.814555, 3868.760, 3887.898111, 4071.150115, 4101.732081, 4340.45917, 4363.209158, 4861.32092, 4931.225284, 4958.909898, 5006.842106, 5875.624, 6300.300802, 6363.773682, 6527.223571, 6548.047948, 6562.793967, 6583.448389, 6716.432467, 6730.808582, 3933.663149, 3968.465041, 4304.398695, 5175.257103, 5893.964261, 1748]
 
-ras = [159.1742083]
-ras = [181.4184]
-decs = [46.5416139]
-decs = [49.1748]
+#%%
+if args.RADec is not None:
+    RA, Dec = [float(x) for x in args.RADec.replace(","," ").split()]
+    print(RA,Dec)
+if args.RA is not None:
+    RA = args.RA
+if args.Dec is not None:
+    Dec = args.Dec
 
-ras = [112.5627]
-decs = [41.7480]
 
-ras = [args.RA]
-decs = [args.Dec]
+# ras = [159.1742083]
+# ras = [181.4184]
+# decs = [46.5416139]
+# decs = [49.1748]
+
+# ras = [112.5627]
+# decs = [41.7480]
+
+ras = [RA]
+decs = [Dec]
 z = args.zs
 zl = args.zl
 wavlims = [args.lmin, args.lmax]
 
 # z = 0.205
-plot_lines_source = args.plotlinessource
-plot_lines_lens = args.plotlineslens
+plot_lines_source = args.plotlinessource if z is not None else False
+plot_lines_lens = args.plotlineslens if zl is not None else False
 
 
 for i in range(len(ras)):
     print(i)
     ra, dec = ras[i], decs[i]
+    
     pos = coords.SkyCoord(ra, dec,  unit='deg')
 
     xid = SDSS.query_region(pos, spectro=True,radius=60*u.arcsec)
@@ -101,7 +113,7 @@ for i in range(len(ras)):
     ax.set_xlim(args.lmin, args.lmax)
     if plot_lines_source:
         for k,line in enumerate(lines):
-#             if linenames[k] in ['OII_1', 'OII_2',  'OIII_3', 'OIII_4', 'OIII_5',  'OIII_2', 'Hg', 'Hb', 'Ha', ]:
+            #if linenames[k] in ['OII_1', 'OII_2',  'OIII_3', 'OIII_4', 'OIII_5',  'OIII_2', 'Hb', 'Ha','CIV','Lya',]:
             if True:
                 ax.vlines(x=line*(1+z), ymin=0, ymax=1, color='black', ls='--', transform=ax.get_xaxis_transform(), alpha=0.5)
                 plt.text(line*(1+z),textheight[k],linenames[k])
